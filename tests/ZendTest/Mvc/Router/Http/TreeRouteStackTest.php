@@ -17,6 +17,7 @@ use Zend\Stdlib\Request as BaseRequest;
 use Zend\Uri\Http as HttpUri;
 use Zend\Mvc\Router\Http\TreeRouteStack;
 use Zend\Mvc\Router\Http\Hostname;
+use Zend\Uri\Http;
 use ZendTest\Mvc\Router\FactoryTester;
 
 class TreeRouteStackTest extends TestCase
@@ -456,6 +457,47 @@ class TreeRouteStackTest extends TestCase
             )
         );
         $this->assertEquals('https://localhost/foo/baz', $stack->assemble(array(), array('name' => 'foo/baz')));
+    }
+
+    public function testChainRouteAssemblingWithOptionalParameter()
+    {
+        $stack = new TreeRouteStack();
+        $stack->addRoute(
+            'foo',
+            array(
+                'type' => 'Segment',
+                'options' => array(
+                    'route' => '/foo[/:language]'
+                )
+            )
+        );
+        $this->assertEquals('/foo', $stack->assemble(array(), array('name' => 'foo')));
+    }
+
+    public function testChainRouteAssemblingWithOpionalParameterAndPrototype()
+    {
+        $stack = new TreeRouteStack();
+        $stack->addPrototype(
+            'bar',
+            array('type' => 'hostname', 'options' => array('route' => 'www.zf2.com'))
+        );
+        $stack->addRoute(
+            'foo',
+            array(
+                'type' => 'Segment',
+                'options' => array(
+                    'route' => '/foo[/:language]'
+                ),
+                'chain_routes' => array(
+                    'bar'
+                ),
+            )
+        );
+        $requestUri = new Http();
+        $requestUri->setHost('www.zf2.com');
+        $requestUri->setScheme('http');
+        $stack->setRequestUri($requestUri);
+        $this->assertEquals('www.zf2.com/foo[/:language]', $stack->assemble(array(), array('name' => 'foo', 'uri' => $requestUri)));
     }
 
     public function testFactory()
