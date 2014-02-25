@@ -497,7 +497,7 @@ class TreeRouteStackTest extends TestCase
         $requestUri->setHost('www.zf2.com');
         $requestUri->setScheme('http');
         $stack->setRequestUri($requestUri);
-        $this->assertEquals('www.zf2.com/foo[/:language]', $stack->assemble(array(), array('name' => 'foo', 'uri' => $requestUri)));
+        $this->assertEquals('www.zf2.com/foo', $stack->assemble(array(), array('name' => 'foo', 'uri' => $requestUri)));
     }
 
     public function testFactory()
